@@ -3,7 +3,7 @@
   "data_provider": "Central Water Commission (CWC) via National Water Data Portal (NWDP, nwdp.nwic.gov.in)",
   "description": "Hourly river water level readings for key CWC gauge stations across major Indian river basins, sourced from the CWC Telemetry and Manual datasets on NWDP and categorised into hydrological alert statuses (NORMAL / WARNING / DANGER / HIGH_FLOOD_EXCEEDED).",
   "temporalCoverage": {
-    "start_date": "2026-01-01T00:30:00Z",
+    "start_date": "2025-08-15T17:30:00Z",
     "end_date": "2026-08-15T17:30:00Z"
   },
   "monitored_basins": [
@@ -23,7 +23,7 @@
       "warning_level_m": 84.51,
       "danger_level_m": 85.4,
       "high_flood_level_m": 89.25,
-      "records": 1933
+      "records": 3177
     },
     {
       "station_code": "GDBDCL",
@@ -34,7 +34,7 @@
       "warning_level_m": 47.5,
       "danger_level_m": 48.5,
       "high_flood_level_m": 53.0,
-      "records": 306
+      "records": 397
     },
     {
       "station_code": "KRSNWDP",
@@ -45,7 +45,7 @@
       "warning_level_m": 18.45,
       "danger_level_m": 19.84,
       "high_flood_level_m": 23.07,
-      "records": 1260
+      "records": 1546
     },
     {
       "station_code": "NRMMDL",
@@ -56,7 +56,7 @@
       "warning_level_m": 439.0,
       "danger_level_m": 441.0,
       "high_flood_level_m": 444.0,
-      "records": 2197
+      "records": 3117
     },
     {
       "station_code": "PTHNGD",
@@ -78,7 +78,7 @@
       "warning_level_m": 136.0,
       "danger_level_m": 137.0,
       "high_flood_level_m": 138.0,
-      "records": 2275
+      "records": 4054
     },
     {
       "station_code": "YMNDLH",
@@ -92,13 +92,13 @@
       "records": 0
     }
   ],
-  "total_records": 7971,
+  "total_records": 12291,
   "alert_status_distribution": {
-    "NORMAL": 3667,
-    "WARNING": 2244,
-    "DANGER": 1282,
-    "HIGH_FLOOD_EXCEEDED": 688,
-    "nan": 90
+    "NORMAL": 5879,
+    "WARNING": 4023,
+    "DANGER": 1567,
+    "HIGH_FLOOD_EXCEEDED": 698,
+    "nan": 124
   },
   "schema": {
     "columns": [
@@ -189,5 +189,5 @@
     }
   ],
   "retention_days": 365,
-  "generated_at": "2026-08-17T19:14:58Z"
+  "generated_at": "2026-08-17T19:27:19Z"
 }
