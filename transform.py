@@ -130,6 +130,7 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df.copy()
     rename: Dict[str, str] = {}
+    merges: Dict[str, List[str]] = {}
     for standard, aliases in _FIELD_ALIASES.items():
         alias_set = {a.lower().strip() for a in aliases}
         matches = [
@@ -139,17 +140,21 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
         if not matches:
             continue
         rename[matches[0]] = standard
-        for extra in matches[1:]:
-            rename[extra] = f"{standard}__merge"
+        extra_names: List[str] = []
+        for i, extra in enumerate(matches[1:], start=1):
+            target = f"{standard}__merge{i}"
+            rename[extra] = target
+            extra_names.append(target)
+        if extra_names:
+            merges[standard] = extra_names
     if not rename:
         return df.copy()
 
     out = df.rename(columns=rename)
-    merge_cols = [c for c in out.columns if c.endswith("__merge")]
-    for col in merge_cols:
-        base = col[: -len("__merge")]
-        out[base] = out[base].combine_first(out[col])
-        out = out.drop(columns=[col])
+    for standard, extra_names in merges.items():
+        for extra in extra_names:
+            out[standard] = out[standard].combine_first(out[extra])
+            out = out.drop(columns=[extra])
     return out
 
 
