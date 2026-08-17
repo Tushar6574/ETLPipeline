@@ -97,8 +97,7 @@
     "NORMAL": 5879,
     "WARNING": 4023,
     "DANGER": 1567,
-    "HIGH_FLOOD_EXCEEDED": 698,
-    "nan": 124
+    "HIGH_FLOOD_EXCEEDED": 698
   },
   "schema": {
     "columns": [
@@ -189,5 +188,5 @@
     }
   ],
   "retention_days": 365,
-  "generated_at": "2026-08-17T19:27:19Z"
+  "generated_at": "2026-08-17T19:42:45Z"
 }
