@@ -24,6 +24,7 @@ Edge cases handled
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -204,6 +205,19 @@ def _resource_in_window(
     return True
 
 
+def _resource_station_names(
+    stations: StationConfig, resource: SourceResource
+) -> List[str]:
+    """Configured source station names belonging to this resource's basin."""
+    wanted_basin = resource.basin.lower()
+    names = {
+        s.source_station_name
+        for s in stations.stations.values()
+        if s.basin_name.lower() == wanted_basin
+    }
+    return sorted(names)
+
+
 def fetch_live_data(
     cfg: APIConfig,
     stations: StationConfig,
@@ -215,13 +229,15 @@ def fetch_live_data(
     """Ingest records from the NWDP CKAN ``datastore_search`` API.
 
     Iterates the configured basin x time-range resources (:meth:`APIConfig
-    .resolve_resources`), paginating each with ``limit``/``offset`` cursors
-    until the API returns fewer records than requested or ``total`` is reached.
-    Resources whose year range cannot contain records newer than ``since`` are
-    skipped, keeping routine incremental runs cheap.
+    .resolve_resources`). Each resource is queried **once per configured
+    station** with an exact-match ``filters={"Station": name}`` so the server
+    only returns the monitored stations (a Godavari 2021-25 backfill drops from
+    ~1.06M rows to ~30K per station), and paginated with ``limit``/``offset``
+    until ``total`` is reached. Resources whose year range cannot contain
+    records newer than ``since`` are skipped.
 
-    Records are filtered to the configured station set (by raw station name)
-    and to the ``(since, end]`` timestamp window.
+    Records are additionally filtered client-side to the configured station
+    set and the ``(since, end]`` timestamp window (idempotency safety net).
 
     Raises
     ------
@@ -248,49 +264,67 @@ def fetch_live_data(
                 resource.basin, resource.time_range, since.isoformat(),
             )
             continue
-        logger.info(
-            "Fetching resource %s (%s %s) since %s",
-            resource.resource_id, resource.basin, resource.time_range, since.isoformat(),
-        )
-        offset = 0
-        while True:
-            params = dict(base_params, resource_id=resource.resource_id, offset=offset)
-            try:
-                resp = session.get(cfg.base_url, params=params, timeout=cfg.timeout_seconds)
-                resp.raise_for_status()
-            except requests.RequestException as exc:
-                raise RuntimeError(
-                    f"live fetch failed at offset={offset} for "
-                    f"{resource.resource_id}: {exc}"
-                ) from exc
+        query_names = _resource_station_names(stations, resource)
+        if not query_names:
+            query_names = [None]  # fallback: unfiltered, client-side filtering only
 
-            payload = resp.json()
-            result = payload.get("result", payload) if isinstance(payload, dict) else payload
-            batch = _payload_records(result)
-            if not batch:
-                logger.info(
-                    "Resource %s exhausted at offset=%d; total rows=%s.",
-                    resource.resource_id, offset,
-                    result.get("total") if isinstance(result, dict) else "?",
+        for station_name in query_names:
+            logger.info(
+                "Fetching resource %s (%s %s) since %s station=%s",
+                resource.resource_id, resource.basin, resource.time_range,
+                since.isoformat(), station_name or "ALL",
+            )
+            offset = 0
+            while True:
+                params = dict(
+                    base_params, resource_id=resource.resource_id, offset=offset
                 )
-                break
+                if station_name is not None:
+                    params["filters"] = json.dumps({"Station": station_name})
+                try:
+                    resp = session.get(
+                        cfg.base_url, params=params, timeout=cfg.timeout_seconds
+                    )
+                    resp.raise_for_status()
+                except requests.RequestException as exc:
+                    raise RuntimeError(
+                        f"live fetch failed at offset={offset} for "
+                        f"{resource.resource_id} station={station_name}: {exc}"
+                    ) from exc
 
-            for raw in batch:
-                norm = _normalise_record(raw)
-                raw_name = str(norm.get(STATION_NAME_COL, "")).strip()
-                if raw_name and wanted and raw_name.lower().strip() not in wanted:
-                    continue
-                ts = _to_utc_ts(norm.get(TIMESTAMP_COL), cfg.source_timezone)
-                if ts is None:
-                    records.append(norm)  # keep; transform layer flags the NaT
-                    continue
-                if since < ts <= end:
-                    records.append(norm)
+                payload = resp.json()
+                result = (
+                    payload.get("result", payload)
+                    if isinstance(payload, dict)
+                    else payload
+                )
+                batch = _payload_records(result)
+                if not batch:
+                    logger.info(
+                        "Resource %s exhausted at offset=%d; total rows=%s.",
+                        resource.resource_id, offset,
+                        result.get("total") if isinstance(result, dict) else "?",
+                    )
+                    break
 
-            total = result.get("total") if isinstance(result, dict) else None
-            offset += len(batch)
-            if len(batch) < cfg.max_per_page or (total is not None and offset >= int(total)):
-                break
+                for raw in batch:
+                    norm = _normalise_record(raw)
+                    raw_name = str(norm.get(STATION_NAME_COL, "")).strip()
+                    if raw_name and wanted and raw_name.lower().strip() not in wanted:
+                        continue
+                    ts = _to_utc_ts(norm.get(TIMESTAMP_COL), cfg.source_timezone)
+                    if ts is None:
+                        records.append(norm)  # keep; transform layer flags the NaT
+                        continue
+                    if since < ts <= end:
+                        records.append(norm)
+
+                total = result.get("total") if isinstance(result, dict) else None
+                offset += len(batch)
+                if len(batch) < cfg.max_per_page or (
+                    total is not None and offset >= int(total)
+                ):
+                    break
 
     if not records:
         logger.info("No new live records after watermark %s.", since.isoformat())
