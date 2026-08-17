@@ -1,0 +1,192 @@
+{
+  "dataset": "CWC River Water Level (Telemetry + Manual, Hourly)",
+  "data_provider": "Central Water Commission (CWC) via National Water Data Portal (NWDP, nwdp.nwic.gov.in)",
+  "description": "Hourly river water level readings for key CWC gauge stations across major Indian river basins, sourced from the CWC Telemetry and Manual datasets on NWDP and categorised into hydrological alert statuses (NORMAL / WARNING / DANGER / HIGH_FLOOD_EXCEEDED).",
+  "temporalCoverage": {
+    "start_date": "2024-12-26T02:30:00Z",
+    "end_date": "2025-12-26T02:30:00Z"
+  },
+  "monitored_basins": [
+    "Cauvery",
+    "Godavari",
+    "Krishna",
+    "Narmada",
+    "Yamuna Basin"
+  ],
+  "monitored_stations": [
+    {
+      "station_code": "CAVMSI",
+      "station_name": "Cauvery at Musiri",
+      "basin_name": "Cauvery",
+      "latitude": 10.93805556,
+      "longitude": 78.44027778,
+      "warning_level_m": 84.51,
+      "danger_level_m": 85.4,
+      "high_flood_level_m": 89.25,
+      "records": 0
+    },
+    {
+      "station_code": "GDBDCL",
+      "station_name": "Godavari at Bhadrachalam",
+      "basin_name": "Godavari",
+      "latitude": 17.66944444,
+      "longitude": 80.87388889,
+      "warning_level_m": 47.5,
+      "danger_level_m": 48.5,
+      "high_flood_level_m": 53.0,
+      "records": 0
+    },
+    {
+      "station_code": "KRSNWDP",
+      "station_name": "Krishna at Wadenepally",
+      "basin_name": "Krishna",
+      "latitude": 16.79416667,
+      "longitude": 80.07305556,
+      "warning_level_m": 18.45,
+      "danger_level_m": 19.84,
+      "high_flood_level_m": 23.07,
+      "records": 0
+    },
+    {
+      "station_code": "NRMMDL",
+      "station_name": "Narmada at Mandla",
+      "basin_name": "Narmada",
+      "latitude": 22.59833333,
+      "longitude": 80.36527778,
+      "warning_level_m": 439.0,
+      "danger_level_m": 441.0,
+      "high_flood_level_m": 444.0,
+      "records": 0
+    },
+    {
+      "station_code": "PTHNGD",
+      "station_name": "Godavari at Paithan (Jaikwadi Dam)",
+      "basin_name": "Godavari",
+      "latitude": 19.472,
+      "longitude": 75.35,
+      "warning_level_m": 458.31,
+      "danger_level_m": 458.96,
+      "high_flood_level_m": 460.56,
+      "records": 0
+    },
+    {
+      "station_code": "YMNCKT",
+      "station_name": "Yamuna at Chitrakoot",
+      "basin_name": "Yamuna Basin",
+      "latitude": 25.14222222,
+      "longitude": 80.85472222,
+      "warning_level_m": 136.0,
+      "danger_level_m": 137.0,
+      "high_flood_level_m": 138.0,
+      "records": 3851
+    },
+    {
+      "station_code": "YMNDLH",
+      "station_name": "Yamuna at Old Delhi Railway Bridge",
+      "basin_name": "Yamuna Basin",
+      "latitude": 28.6585,
+      "longitude": 77.2347,
+      "warning_level_m": 203.0,
+      "danger_level_m": 205.32,
+      "high_flood_level_m": 207.49,
+      "records": 0
+    }
+  ],
+  "total_records": 3851,
+  "alert_status_distribution": {
+    "WARNING": 2691,
+    "NORMAL": 1032,
+    "DANGER": 84,
+    "HIGH_FLOOD_EXCEEDED": 44
+  },
+  "schema": {
+    "columns": [
+      "station_code",
+      "station_name",
+      "basin_name",
+      "timestamp",
+      "water_level",
+      "flood_status",
+      "warning_level",
+      "danger_level",
+      "high_flood_level",
+      "latitude",
+      "longitude",
+      "dedup_key"
+    ]
+  },
+  "sources": [
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Godavari",
+      "kind": "telemetry",
+      "time_range": "(2021 - 2025)",
+      "resource_id": "4d139325-8371-422f-acef-d34ccec4300e"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Godavari",
+      "kind": "telemetry",
+      "time_range": "(2026 - 2030)",
+      "resource_id": "c6f31452-b416-4599-a6ae-07ad4217cdf4"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Krishna",
+      "kind": "telemetry",
+      "time_range": "(2021 - 2025)",
+      "resource_id": "4ddede56-5e49-4956-bb6f-df3786bf601f"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Krishna",
+      "kind": "telemetry",
+      "time_range": "(2026 - 2030)",
+      "resource_id": "d80798b9-4b11-4626-8b63-964202ba7216"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Cauvery",
+      "kind": "telemetry",
+      "time_range": "(2021 - 2025)",
+      "resource_id": "b5776a31-0583-4c27-a2d9-ee81e3b3a03a"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Cauvery",
+      "kind": "telemetry",
+      "time_range": "(2026 - 2030)",
+      "resource_id": "d027c5ac-379d-4ac2-8ced-97b02b6edbc0"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Narmada",
+      "kind": "telemetry",
+      "time_range": "(2021 - 2025)",
+      "resource_id": "0b01ff69-83de-4274-8233-6e564a6eeb9a"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Narmada",
+      "kind": "telemetry",
+      "time_range": "(2026 - 2030)",
+      "resource_id": "a2e056f6-ed8a-45bf-9142-01dc1904405a"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Yamuna Basin",
+      "kind": "manual",
+      "time_range": "(2021 - 2025)",
+      "resource_id": "dd3b9bba-6ba2-4954-93cf-e3ee84b5d9af"
+    },
+    {
+      "provider": "CWC / National Water Data Portal (NWDP)",
+      "basin": "Yamuna Basin",
+      "kind": "manual",
+      "time_range": "(2026 - 2030)",
+      "resource_id": "8663d648-5057-4eaf-86fc-72d5e755f053"
+    }
+  ],
+  "retention_days": 365,
+  "generated_at": "2026-08-17T18:03:11Z"
+}

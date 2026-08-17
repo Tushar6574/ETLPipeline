@@ -1,0 +1,80 @@
+name: ETL Hourly Schedule
+
+on:
+  schedule:
+    # Every hour at minute 15 (UTC). Cron is evaluated in UTC on GitHub.
+    - cron: "15 * * * *"
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "Full backfill (ignore existing watermark)"
+        required: false
+        default: "false"
+        type: boolean
+      basins:
+        description: "Comma-separated basin filter (e.g. godavari,yamuna)"
+        required: false
+        default: ""
+        type: string
+      start_date:
+        description: "ISO start date for backfill (e.g. 2021-01-01)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: etl-hourly
+  cancel-in-progress: false
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CWC_API_KEY: ${{ secrets.CWC_API_KEY }}
+      CWC_USE_MOCK: ${{ vars.CWC_USE_MOCK }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run ETL pipeline
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.backfill }}" = "true" ]; then
+            ARGS="$ARGS --backfill"
+          fi
+          if [ -n "${{ github.event.inputs.basins }}" ]; then
+            ARGS="$ARGS --basins ${{ github.event.inputs.basins }}"
+          fi
+          if [ -n "${{ github.event.inputs.start_date }}" ]; then
+            ARGS="$ARGS --start-date ${{ github.event.inputs.start_date }}"
+          fi
+          python main.py $ARGS
+
+      - name: Commit and push updated dataset
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/ mock_output/ dataset-metadata.json
+          if git diff --cached --quiet; then
+            echo "No dataset changes; skipping commit."
+            exit 0
+          fi
+          git commit -m "chore(etl): hourly river water level dataset refresh [skip ci]"
+          git push origin "$(git rev-parse --abbrev-ref HEAD)"
+        shell: bash
