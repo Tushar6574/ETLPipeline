@@ -32,7 +32,7 @@ concurrency:
 jobs:
   run-etl:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     env:
       CWC_API_KEY: ${{ secrets.CWC_API_KEY }}
       CWC_USE_MOCK: ${{ vars.CWC_USE_MOCK }}
@@ -70,7 +70,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/ mock_output/ dataset-metadata.json
+          git add output/ mock_output/
           if git diff --cached --quiet; then
             echo "No dataset changes; skipping commit."
             exit 0
