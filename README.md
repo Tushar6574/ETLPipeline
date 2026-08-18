@@ -289,8 +289,11 @@ and the steepest 24 h rise - not a hydrological model.
 1. Push this repo (public, or private with the Cloud app connected to GitHub).
 2. New app → select the repo, set **Main file path** = `app.py`.
 3. Under **Advanced settings** set the requirements file to
-   `requirements-ui.txt` and Python 3.10. This installs the light stack only,
-   so the build succeeds quickly and the app runs on the XGBoost engine.
+   `requirements-ui.txt` and **Python version to 3.13**. Do not use Python
+   3.14: `pyarrow` (a transitive dependency of streamlit's `pydeck`/`altair`)
+   has no 3.14 wheel yet, so the build falls back to compiling from source and
+   fails on `cmake`. This installs the light stack only, so the build succeeds
+   quickly and the app runs on the XGBoost engine.
 4. The app URL is generated from the repo name, so creating the app activates
    **https://ETLPipeline.streamlit.app**.
 5. *(Optional)* to enable TimesFM 2.5 on the Cloud app, add a small
