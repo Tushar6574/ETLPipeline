@@ -235,6 +235,8 @@ percentages and per-station `flood_status` distributions).
 
 ## Dashboard UI
 
+**Live app: [https://ETLPipeline.streamlit.app](https://ETLPipeline.streamlit.app)**
+
 A Streamlit dashboard (`app.py`) visualises the committed dataset and forecasts
 flood-prone zones. It needs a **separate** dependency file so the ETL workflow
 `pip install` stays fast.
@@ -283,8 +285,9 @@ and the steepest 24 h rise - not a hydrological model.
 2. New app → select the repo, set **Main file path** = `app.py`.
 3. Under **Advanced settings** set the requirements file to
    `requirements-ui.txt` and Python 3.10.
-4. First TimesFM forecast downloads the checkpoint on the container; later
-   runs reuse the on-cloud HuggingFace cache.
+4. The app URL is generated from the repo name, so creating the app activates
+   **https://ETLPipeline.streamlit.app**. First TimesFM forecast downloads the
+   checkpoint on the container; later runs reuse the on-cloud HuggingFace cache.
 
 ---
 
