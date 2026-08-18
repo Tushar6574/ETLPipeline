@@ -30,6 +30,7 @@ from ui.forecast import (
     risk_score,
     station_catalogue,
     timesfm_available,
+    xgb_trained_stations,
 )
 from ui.viz import build_risk_map, plot_forecast_fan, plot_level_history, plot_status_bars
 
@@ -61,10 +62,13 @@ def _forecast_cached(
 
 @st.cache_data(show_spinner=False, ttl=900)
 def _overview_risks(df: pd.DataFrame, horizon: int) -> dict:
-    """Fast XGBoost risk snapshot for every station (used on the Overview tab)."""
+    """Fast XGBoost risk snapshot for every trained station (Overview tab)."""
     out = {}
     catalogue = station_catalogue()
+    trained = xgb_trained_stations()
     for code in sorted(df["station_code"].dropna().unique()):
+        if code not in trained:
+            continue
         try:
             res = forecast_station(df, code, horizon=horizon, engine="xgboost")
             station = catalogue.get(code)
@@ -183,10 +187,19 @@ with tab_overview:
             )
             max_risk = max(r["risk_score"] for r in risks.values())
             st.progress(int(min(max_risk, 100)))
-            st.caption("Risk blends threshold proximity, forecast crossing and "
-                       "surge slope (heuristic). Buffers scale with risk.")
+            st.caption("Risk 0 = safely below danger with no forecasted rise. "
+                       "Blends threshold proximity, forecast crossing and surge "
+                       "slope (heuristic). Buffers scale with risk.")
         else:
             st.info("No risk scores computed - check the training models.")
+        skipped = sorted(
+            set(df["station_code"].dropna().unique()) - set(risks)
+        )
+        if skipped:
+            st.caption(
+                f"No XGBoost model for {', '.join(skipped)} - use the TimesFM "
+                "engine in the Flood Forecast tab."
+            )
 
     st.divider()
     st.subheader("Current status distribution")
@@ -263,7 +276,8 @@ with tab_forecast:
         st.caption(
             f"{res.note}. Band = 10-90% quantiles (TimesFM col1/col9; "
             "XGBoost q05/q95 mirror-guarded). Time-to-threshold is the first "
-            "hour the mean forecast crosses it."
+            "hour the mean forecast crosses it. Risk 0 = safely below danger "
+            "with no forecasted rise."
         )
         if np.isfinite(risk["proximity"]):
             st.write(

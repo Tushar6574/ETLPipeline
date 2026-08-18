@@ -181,6 +181,31 @@ def _load_xgb_artifacts(models_dir) -> Dict[str, object]:
     return {"q50": booster, "bands": bands}
 
 
+def xgb_trained_stations(models_dir=None) -> set:
+    """Station codes with a committed XGBoost model (keys of ``xgb_bands.json``).
+
+    Stations excluded from training (junk fraction / few records) have no band
+    offsets, so XGBoost forecasts for them are not meaningful.
+    """
+    import json
+    from pathlib import Path
+
+    models_dir = (
+        Path(models_dir)
+        if models_dir
+        else Path(__file__).resolve().parents[1] / "models"
+    )
+    bands_path = models_dir / "xgb_bands.json"
+    if not bands_path.exists():
+        return set()
+    try:
+        bands = json.loads(bands_path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return set()
+    inv = {v: k for k, v in category_maps()[STATION_CODE_COL].items()}
+    return {inv[int(c)] for c in bands if int(c) in inv}
+
+
 def _forecast_xgb(
     df: pd.DataFrame,
     station_code: str,
@@ -201,10 +226,12 @@ def _forecast_xgb(
             f"Only {len(series)} hours available for {station_code} (need >= {min_len})."
         )
     code_int = int(maps[STATION_CODE_COL][station_code])
-    try:
-        lo_off, hi_off = (float(v) for v in artifacts["bands"][str(code_int)])
-    except Exception:  # noqa: BLE001 - default band if offsets are missing
-        lo_off, hi_off = -0.5, 0.5
+    if str(code_int) not in artifacts["bands"]:
+        raise RuntimeError(
+            f"XGBoost model is not trained on {station_code} (excluded for "
+            "data quality). Switch the forecast engine to TimesFM."
+        )
+    lo_off, hi_off = (float(v) for v in artifacts["bands"][str(code_int)])
     work = series
     means, lows, highs = [], [], []
     for _ in range(horizon):
@@ -326,6 +353,7 @@ __all__ = [
     "station_catalogue",
     "timesfm_available",
     "forecast_station",
+    "xgb_trained_stations",
     "hours_to_threshold",
     "risk_score",
 ]

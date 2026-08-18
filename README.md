@@ -274,7 +274,11 @@ only for the current session).
 - **XGBoost fallback** (global GBM, committed in `models/`) - a single
   `reg:squarederror` center model trained offline on all stations plus
   per-station residual band offsets (`xgb_bands.json`), recursive multi-step.
-  Runs in milliseconds with no network. Retrain after significant data changes:
+  Runs in milliseconds with no network. Stations excluded from training (junk
+  fraction / few records - currently NRMMDL, PTHNGD, YMNDLH) have **no
+  XGBoost model**: the Overview lists them as "no model" and the Flood Forecast
+  tab refuses an XGBoost forecast for them (use the TimesFM engine). Retrain
+  after significant data changes:
 
 ```bash
 python scripts/train_xgboost.py          # writes models/xgb_q50.json + xgb_bands.json
