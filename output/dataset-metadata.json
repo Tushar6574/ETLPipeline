@@ -3,8 +3,8 @@
   "data_provider": "Central Water Commission (CWC) via National Water Data Portal (NWDP, nwdp.nwic.gov.in)",
   "description": "Hourly river water level readings for key CWC gauge stations across major Indian river basins, sourced from the CWC Telemetry and Manual datasets on NWDP and categorised into hydrological alert statuses (NORMAL / WARNING / DANGER / HIGH_FLOOD_EXCEEDED).",
   "temporalCoverage": {
-    "start_date": "2025-08-15T17:30:00Z",
-    "end_date": "2026-08-15T17:30:00Z"
+    "start_date": "2025-08-16T17:30:00Z",
+    "end_date": "2026-08-16T17:30:00Z"
   },
   "monitored_basins": [
     "Cauvery",
@@ -20,9 +20,9 @@
       "basin_name": "Cauvery",
       "latitude": 10.93805556,
       "longitude": 78.44027778,
-      "warning_level_m": 84.51,
-      "danger_level_m": 85.4,
-      "high_flood_level_m": 89.25,
+      "warning_level_m": 82.115,
+      "danger_level_m": 83.115,
+      "high_flood_level_m": 86.175,
       "records": 3177
     },
     {
@@ -31,9 +31,9 @@
       "basin_name": "Godavari",
       "latitude": 17.66944444,
       "longitude": 80.87388889,
-      "warning_level_m": 47.5,
-      "danger_level_m": 48.5,
-      "high_flood_level_m": 53.0,
+      "warning_level_m": 45.72,
+      "danger_level_m": 48.77,
+      "high_flood_level_m": 55.66,
       "records": 397
     },
     {
@@ -42,10 +42,10 @@
       "basin_name": "Krishna",
       "latitude": 16.79416667,
       "longitude": 80.07305556,
-      "warning_level_m": 18.45,
-      "danger_level_m": 19.84,
-      "high_flood_level_m": 23.07,
-      "records": 1546
+      "warning_level_m": 23.0,
+      "danger_level_m": 23.5,
+      "high_flood_level_m": 24.0,
+      "records": 1541
     },
     {
       "station_code": "NRMMDL",
@@ -53,10 +53,10 @@
       "basin_name": "Narmada",
       "latitude": 22.59833333,
       "longitude": 80.36527778,
-      "warning_level_m": 439.0,
-      "danger_level_m": 441.0,
-      "high_flood_level_m": 444.0,
-      "records": 3117
+      "warning_level_m": 437.2,
+      "danger_level_m": 437.8,
+      "high_flood_level_m": 439.405,
+      "records": 3096
     },
     {
       "station_code": "PTHNGD",
@@ -64,9 +64,9 @@
       "basin_name": "Godavari",
       "latitude": 19.472,
       "longitude": 75.35,
-      "warning_level_m": 458.31,
-      "danger_level_m": 458.96,
-      "high_flood_level_m": 460.56,
+      "warning_level_m": 463.91,
+      "danger_level_m": 465.5,
+      "high_flood_level_m": 465.5,
       "records": 0
     },
     {
@@ -75,9 +75,9 @@
       "basin_name": "Yamuna Basin",
       "latitude": 25.14222222,
       "longitude": 80.85472222,
-      "warning_level_m": 136.0,
-      "danger_level_m": 137.0,
-      "high_flood_level_m": 138.0,
+      "warning_level_m": 137.0,
+      "danger_level_m": 137.5,
+      "high_flood_level_m": 138.5,
       "records": 4054
     },
     {
@@ -86,18 +86,18 @@
       "basin_name": "Yamuna Basin",
       "latitude": 28.6585,
       "longitude": 77.2347,
-      "warning_level_m": 203.0,
-      "danger_level_m": 205.32,
+      "warning_level_m": 204.5,
+      "danger_level_m": 205.33,
       "high_flood_level_m": 207.49,
       "records": 0
     }
   ],
-  "total_records": 12291,
+  "total_records": 12265,
   "alert_status_distribution": {
-    "NORMAL": 5879,
-    "WARNING": 4023,
-    "DANGER": 1567,
-    "HIGH_FLOOD_EXCEEDED": 698
+    "NORMAL": 5874,
+    "WARNING": 4003,
+    "DANGER": 1568,
+    "HIGH_FLOOD_EXCEEDED": 697
   },
   "schema": {
     "columns": [
@@ -188,5 +188,5 @@
     }
   ],
   "retention_days": 365,
-  "generated_at": "2026-08-18T03:08:57Z"
+  "generated_at": "2026-08-18T09:34:10Z"
 }
