@@ -11,7 +11,14 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import streamlit as st
-from streamlit_folium import st_folium
+
+try:
+    from streamlit_folium import st_folium
+except Exception:  # noqa: BLE001 - keep the app usable if the component is missing
+    import streamlit.components.v1 as _components
+
+    def st_folium(m, width="100%", height=480, **kwargs):
+        _components.html(m.get_root()._repr_html_(), height=height, scrolling=True)
 
 from config import DEFAULT_STATIONS
 from ui.data import default_paths, load_dataset, latest_reading, refresh_dataset, station_meta_map
