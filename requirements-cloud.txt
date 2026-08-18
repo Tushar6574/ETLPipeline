@@ -1,2 +1,2 @@
--r requirements-ui.txt
+-r requirements.txt
 -r requirements-timesfm.txt

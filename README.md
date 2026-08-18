@@ -238,11 +238,12 @@ percentages and per-station `flood_status` distributions).
 **Live app: [https://ETLPipeline.streamlit.app](https://ETLPipeline.streamlit.app)**
 
 A Streamlit dashboard (`app.py`) visualises the committed dataset and forecasts
-flood-prone zones. It needs a **separate** dependency file so the ETL workflow
-`pip install` stays fast.
+flood-prone zones. The light UI stack (streamlit, plotly, folium, xgboost) is
+bundled into `requirements.txt`, so one install covers both the pipeline and the
+dashboard. TimesFM + torch stay in a separate optional file.
 
 ```bash
-pip install -r requirements-ui.txt   # streamlit, plotly, folium, xgboost (light)
+pip install -r requirements.txt      # ETL + light UI stack (XGBoost engine ready)
 pip install -r requirements-timesfm.txt  # OPTIONAL: TimesFM 2.5 + torch (~800 MB)
 streamlit run app.py
 ```
@@ -289,18 +290,16 @@ and the steepest 24 h rise - not a hydrological model.
 1. Push this repo (public, or private with the Cloud app connected to GitHub).
 2. New app → select the repo, set **Main file path** = `app.py`.
 3. Under **Advanced settings** set the requirements file to
-   `requirements-ui.txt` and **Python version to 3.13**. Do not use Python
-   3.14: `pyarrow` (a transitive dependency of streamlit's `pydeck`/`altair`)
-   has no 3.14 wheel yet, so the build falls back to compiling from source and
-   fails on `cmake`. This installs the light stack only, so the build succeeds
-   quickly and the app runs on the XGBoost engine.
+   **`requirements-cloud.txt`** (ETL + UI stack + TimesFM 2.5) and **Python
+   version to 3.13**. Do not use Python 3.14: `pyarrow` has no 3.14 wheel yet,
+   so the build falls back to compiling from source and fails on `cmake`.
 4. The app URL is generated from the repo name, so creating the app activates
    **https://ETLPipeline.streamlit.app**.
-5. *(Optional)* to enable TimesFM 2.5 on the Cloud app, point Advanced settings
-   at **`requirements-cloud.txt`** instead (it includes `timesfm==2.0.2` +
-   `torch` on top of the UI stack) and keep Python 3.13. Note the torch wheel
-   (~200 MB) makes installs slower and can exceed the free-tier build budget -
-   it is only needed for the TimesFM engine.
+5. Need a faster, lighter build (or the torch install exceeds the free-tier
+   budget)? Point Advanced settings at **`requirements-ui.txt`** instead to run
+   on the XGBoost engine only — or leave the default **`requirements.txt`**,
+   which now also installs the full UI stack as a fallback (still XGBoost-only,
+   no TimesFM). Keep Python 3.13 either way.
 
 ---
 
@@ -437,10 +436,10 @@ Notable fixes along the way:
 │   └── train_xgboost.py    # Trains + commits the XGBoost fallback models
 ├── tests/                  # pytest suite (features, forecast, viz, transform)
 ├── models/                 # Committed XGBoost artifacts (xgb_q50.json, xgb_bands.json)
-├── requirements.txt        # requests, pandas, numpy, pyarrow (ETL)
-├── requirements-ui.txt     # streamlit, plotly, folium, xgboost (UI, light)
+├── requirements.txt        # ETL + light UI stack (requests, pandas, numpy, pyarrow, streamlit, plotly, folium, xgboost)
+├── requirements-ui.txt     # Light UI stack (included by requirements.txt)
 ├── requirements-timesfm.txt# timesfm 2.5 + torch (optional TimesFM engine)
-├── requirements-cloud.txt  # full stack for Streamlit Cloud (UI + TimesFM)
+├── requirements-cloud.txt  # full stack for Streamlit Cloud (ETL + UI + TimesFM)
 ├── requirements-dev.txt    # pytest
 ├── .github/workflows/
 │   ├── etl_schedule.yml    # Hourly cron + manual dispatch + auto-commit
