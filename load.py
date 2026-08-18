@@ -112,6 +112,11 @@ def merge_with_existing(
 
     merged = pd.concat([existing, new_df], ignore_index=True)
 
+    # Persist only the canonical schema. Legacy raw telemetry extras (SlNo,
+    # _id, State, District, ...) carried by the existing CSV are dropped so the
+    # published schema stays stable and mixed-dtype columns cannot resurface.
+    merged = merged[[c for c in COLUMN_ORDER if c in merged.columns]]
+
     # Normalise dtypes after concat: existing CSV strings + fresh datetime64
     # objects otherwise produce an object column that breaks serialisation.
     if TIMESTAMP_COL in merged.columns:
