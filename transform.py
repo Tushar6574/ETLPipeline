@@ -345,6 +345,7 @@ def transform(
     df[FLOOD_STATUS_COL] = derive_flood_status(df)
     df[DEDUP_KEY_COL] = create_dedup_key(df)
     df = order_columns(df)
+    df = df[[c for c in COLUMN_ORDER if c in df.columns]]
     df = df.sort_values([STATION_CODE_COL, TIMESTAMP_COL]).reset_index(drop=True)
     logger.info("Transform produced %d clean records.", len(df))
     return df
