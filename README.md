@@ -242,9 +242,14 @@ flood-prone zones. It needs a **separate** dependency file so the ETL workflow
 `pip install` stays fast.
 
 ```bash
-pip install -r requirements-ui.txt   # streamlit, plotly, folium, xgboost, timesfm, torch
+pip install -r requirements-ui.txt   # streamlit, plotly, folium, xgboost (light)
+pip install -r requirements-timesfm.txt  # OPTIONAL: TimesFM 2.5 + torch (~800 MB)
 streamlit run app.py
 ```
+
+Without the TimesFM extras the dashboard boots with the **XGBoost fallback**
+engine (models are committed in `models/`); install them to enable the
+TimesFM 2.5 primary engine.
 
 | Tab | What it shows |
 |-----|---------------|
@@ -284,10 +289,16 @@ and the steepest 24 h rise - not a hydrological model.
 1. Push this repo (public, or private with the Cloud app connected to GitHub).
 2. New app → select the repo, set **Main file path** = `app.py`.
 3. Under **Advanced settings** set the requirements file to
-   `requirements-ui.txt` and Python 3.10.
+   `requirements-ui.txt` and Python 3.10. This installs the light stack only,
+   so the build succeeds quickly and the app runs on the XGBoost engine.
 4. The app URL is generated from the repo name, so creating the app activates
-   **https://ETLPipeline.streamlit.app**. First TimesFM forecast downloads the
-   checkpoint on the container; later runs reuse the on-cloud HuggingFace cache.
+   **https://ETLPipeline.streamlit.app**.
+5. *(Optional)* to enable TimesFM 2.5 on the Cloud app, add a small
+   `requirements-cloud.txt` in the repo containing both files' contents
+   (`streamlit`, `plotly`, `folium`, `streamlit-folium`, `xgboost`,
+   `timesfm==2.0.2`, `torch`) and point Advanced settings at it. Note the torch
+   wheel (~200 MB) makes installs slower and can exceed the free-tier build
+   budget - it is only needed for the TimesFM engine.
 
 ---
 
@@ -424,7 +435,8 @@ Notable fixes along the way:
 │   └── train_xgboost.py    # Trains + commits the XGBoost fallback models
 ├── models/                 # Committed XGBoost artifacts (xgb_q50.json, xgb_bands.json)
 ├── requirements.txt        # requests, pandas, numpy, pyarrow (ETL)
-├── requirements-ui.txt     # streamlit, plotly, folium, xgboost, timesfm, torch (UI)
+├── requirements-ui.txt     # streamlit, plotly, folium, xgboost (UI, light)
+├── requirements-timesfm.txt# timesfm 2.5 + torch (optional TimesFM engine)
 ├── .github/workflows/
 │   └── etl_schedule.yml    # Hourly cron + manual dispatch + auto-commit
 ├── output/                 # Published live dataset (CSV / Parquet / partitions / metadata)

@@ -1,0 +1,2 @@
+timesfm==2.0.2
+torch>=2.2
