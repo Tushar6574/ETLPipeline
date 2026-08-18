@@ -1,0 +1,7 @@
+streamlit>=1.36
+plotly>=5.20
+folium>=0.16
+streamlit-folium>=0.21
+xgboost>=2.0
+timesfm==2.0.2
+torch>=2.2

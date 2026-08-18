@@ -24,6 +24,7 @@ per-station partitions every hour via GitHub Actions.
 - [Dataset schema](#dataset-schema)
 - [Flood alert categorisation](#flood-alert-categorisation)
 - [Quickstart](#quickstart)
+- [Dashboard UI](#dashboard-ui)
 - [CLI reference](#cli-reference)
 - [Configuration](#configuration)
 - [GitHub Actions](#github-actions)
@@ -232,6 +233,61 @@ percentages and per-station `flood_status` distributions).
 
 ---
 
+## Dashboard UI
+
+A Streamlit dashboard (`app.py`) visualises the committed dataset and forecasts
+flood-prone zones. It needs a **separate** dependency file so the ETL workflow
+`pip install` stays fast.
+
+```bash
+pip install -r requirements-ui.txt   # streamlit, plotly, folium, xgboost, timesfm, torch
+streamlit run app.py
+```
+
+| Tab | What it shows |
+|-----|---------------|
+| **Overview** | KPIs, folium map with alert-coloured markers + risk-scaled buffers, and a risk-ranked station table (XGBoost snapshot, 72 h default). |
+| **Water Level Explorer** | Historical level chart with WL / DL / HFL threshold lines and the latest readings. |
+| **Flood Forecast** | Forecast fan chart (observed tail + mean + 10-90% band), last/peak level, risk score and hours-to-danger. |
+| **Data & Quality** | Per-station record counts, schema, and documented NWDP data-quality caveats. |
+
+Sidebar controls: **forecast engine**, **horizon** (24-168 h), and a
+**Refresh now** button that re-runs the incremental ETL against the live NWDP
+API (on Streamlit Cloud the container is ephemeral, so refreshed data lasts
+only for the current session).
+
+### Forecasting engines
+
+- **TimesFM 2.5** (Google, `timesfm==2.0.2`, torch) - zero-shot foundation
+  model used as the primary engine. The ~800 MB checkpoint is downloaded on
+  first use and cached for the session (`st.cache_resource`). Forecasts run on
+  a cleaned hourly series (resampled, MAD-clipped, threshold-banded, junk
+  plateaus removed).
+- **XGBoost fallback** (global GBM, committed in `models/`) - a single
+  `reg:squarederror` center model trained offline on all stations plus
+  per-station residual band offsets (`xgb_bands.json`), recursive multi-step.
+  Runs in milliseconds with no network. Retrain after significant data changes:
+
+```bash
+python scripts/train_xgboost.py          # writes models/xgb_q50.json + xgb_bands.json
+```
+
+The band on the fan chart is the model's 10-90% interval (TimesFM quantile
+head columns; XGBoost per-station residual quantiles). The **risk score** (0-100)
+is an interpretable heuristic blending threshold proximity, forecast crossing
+and the steepest 24 h rise - not a hydrological model.
+
+### Deploying to Streamlit Community Cloud
+
+1. Push this repo (public, or private with the Cloud app connected to GitHub).
+2. New app → select the repo, set **Main file path** = `app.py`.
+3. Under **Advanced settings** set the requirements file to
+   `requirements-ui.txt` and Python 3.10.
+4. First TimesFM forecast downloads the checkpoint on the container; later
+   runs reuse the on-cloud HuggingFace cache.
+
+---
+
 ## CLI reference
 
 ```
@@ -355,7 +411,17 @@ Notable fixes along the way:
 ├── transform.py            # Aliasing, timestamps, thresholds, flood status, schema
 ├── load.py                 # Idempotent merge, retention, atomic writes, metadata
 ├── validation.py           # Duplicate / null / summary checks
-├── requirements.txt        # requests, pandas, numpy, pyarrow
+├── app.py                  # Streamlit dashboard (UI, see Dashboard UI)
+├── ui/
+│   ├── features.py         # Shared feature engineering / series sanitisation
+│   ├── data.py             # Cached dataset loaders + on-demand refresh
+│   ├── forecast.py         # TimesFM 2.5 + XGBoost engines, risk heuristic
+│   └── viz.py              # Plotly charts + folium risk map
+├── scripts/
+│   └── train_xgboost.py    # Trains + commits the XGBoost fallback models
+├── models/                 # Committed XGBoost artifacts (xgb_q50.json, xgb_bands.json)
+├── requirements.txt        # requests, pandas, numpy, pyarrow (ETL)
+├── requirements-ui.txt     # streamlit, plotly, folium, xgboost, timesfm, torch (UI)
 ├── .github/workflows/
 │   └── etl_schedule.yml    # Hourly cron + manual dispatch + auto-commit
 ├── output/                 # Published live dataset (CSV / Parquet / partitions / metadata)
