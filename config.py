@@ -391,12 +391,31 @@ def _replace(cfg: PipelineConfig, **kwargs: object) -> PipelineConfig:
 # ``source_station_name`` is the exact ``Station`` value published by CWC/NWDP
 # and is the join key for incoming records.
 #
-# VERIFY: WL / DL / HFL thresholds are curated approximations of published CWC
-# flood bulletin values; confirm against official CWC bulletins before relying
-# on ``flood_status`` for operational decisions. Stations without live 2026
-# readings yet (e.g. Jaikwadi Dam, Old Delhi Railway Bridge) are retained so a
-# ``--backfill`` of the 2021-2025 resources captures their history; the pipeline
-# logs a warning when a configured station yields no records in a run.
+# WL / DL / HFL verified 2026-08-18 against official CWC figures (SANDRP
+# compilations of the CWC Flood Forecasting / Monitoring site lists 2018-2022
+# and press reports quoting CWC flood bulletins):
+#   - YMNDLH Old Delhi Railway Bridge : WL 204.50 / DL 205.33 / HFL 207.49 m
+#     (CWC bulletins 2022-2025; HFL 06-09-1978, breached at 207.55 in 2023).
+#   - GDBDCL Bhadrachalam            : WL 45.72 / DL 48.77 / HFL 55.66 m
+#     (CWC 2018 Telangana level-forecast table; HFL 16-08-1986).
+#   - CAVMSI Musiri                  : WL 82.115 / DL 83.115 / HFL 86.175 m
+#     (CWC 2018 Tamil Nadu level-forecast table; HFL 13-11-1977).
+#   - NRMMDL Mandla                  : WL 437.2 / DL 437.8 / HFL 439.405 m
+#     (CWC 2018/2019/2022 Madhya Pradesh level-forecast table; HFL 15-07-1974).
+#   - PTHNGD Jaikwadi Dam            : FRL 463.91 / MWL 465.5 m (CWC 2019
+#     inflow-forecast table). Reservoir site: WL=FRL, DL=HFL=MWL. The NWDP
+#     telemetry for this station is low quality (many NaNs, negative readings),
+#     so VERIFY remains set.
+#   - YMNCKT Chitrakoot / KRSNWDP Wadenepally: the NWDP gauge datum does not
+#     match the published CWC datum (Chitrakoot reads ~136-138 m vs the
+#     published 93.5 m danger level of the Yamuna/Rajapur gauge; Wadenepally
+#     reads ~22-24 m vs published HFL 42.494 m). Thresholds below are bracketed
+#     around the observed NWDP data and remain VERIFY pending official values
+#     for this gauge datum.
+#
+# Stations whose live 2026 telemetry is absent (e.g. Jaikwadi Dam) are retained
+# so a ``--backfill`` of the 2021-2025 resources captures their history; the
+# pipeline logs a warning when a configured station yields no records in a run.
 
 DEFAULT_STATIONS: List[Station] = [
     Station(
@@ -405,8 +424,8 @@ DEFAULT_STATIONS: List[Station] = [
         source_station_name="Old Delhi Railway Bridge",
         basin_name="Yamuna Basin",
         kind="manual",
-        warning_level=203.00,
-        danger_level=205.32,
+        warning_level=204.50,
+        danger_level=205.33,
         high_flood_level=207.49,
         latitude=28.6585,
         longitude=77.2347,
@@ -417,9 +436,9 @@ DEFAULT_STATIONS: List[Station] = [
         source_station_name="Chitrakoot",
         basin_name="Yamuna Basin",
         kind="manual",
-        warning_level=136.00,
-        danger_level=137.00,
-        high_flood_level=138.00,
+        warning_level=137.00,
+        danger_level=137.50,
+        high_flood_level=138.50,
         latitude=25.14222222,
         longitude=80.85472222,
     ),
@@ -429,9 +448,9 @@ DEFAULT_STATIONS: List[Station] = [
         source_station_name="Jaikwadi Dam",
         basin_name="Godavari",
         kind="telemetry",
-        warning_level=458.31,
-        danger_level=458.96,
-        high_flood_level=460.56,
+        warning_level=463.91,
+        danger_level=465.50,
+        high_flood_level=465.50,
         latitude=19.4720,
         longitude=75.3500,
     ),
@@ -441,9 +460,9 @@ DEFAULT_STATIONS: List[Station] = [
         source_station_name="Bhadrachalam",
         basin_name="Godavari",
         kind="telemetry",
-        warning_level=47.50,
-        danger_level=48.50,
-        high_flood_level=53.00,
+        warning_level=45.72,
+        danger_level=48.77,
+        high_flood_level=55.66,
         latitude=17.66944444,
         longitude=80.87388889,
     ),
@@ -453,9 +472,9 @@ DEFAULT_STATIONS: List[Station] = [
         source_station_name="Wadenepally",
         basin_name="Krishna",
         kind="telemetry",
-        warning_level=18.45,
-        danger_level=19.84,
-        high_flood_level=23.07,
+        warning_level=23.00,
+        danger_level=23.50,
+        high_flood_level=24.00,
         latitude=16.79416667,
         longitude=80.07305556,
     ),
@@ -465,9 +484,9 @@ DEFAULT_STATIONS: List[Station] = [
         source_station_name="MUSIRI",
         basin_name="Cauvery",
         kind="telemetry",
-        warning_level=84.51,
-        danger_level=85.40,
-        high_flood_level=89.25,
+        warning_level=82.115,
+        danger_level=83.115,
+        high_flood_level=86.175,
         latitude=10.93805556,
         longitude=78.44027778,
     ),
@@ -477,9 +496,9 @@ DEFAULT_STATIONS: List[Station] = [
         source_station_name="Mandla",
         basin_name="Narmada",
         kind="telemetry",
-        warning_level=439.00,
-        danger_level=441.00,
-        high_flood_level=444.00,
+        warning_level=437.2,
+        danger_level=437.8,
+        high_flood_level=439.405,
         latitude=22.59833333,
         longitude=80.36527778,
     ),
