@@ -91,11 +91,11 @@ with st.sidebar:
     st.caption("NWDP / CWC · ETL pipeline + TimesFM 2.5")
     engine = st.radio(
         "Forecast engine",
-        ["timesfm", "xgboost"],
-        index=0 if timesfm_available() else 1,
+        ["xgboost", "timesfm"],
+        index=0,
         help=(
-            "TimesFM 2.5 (Google, zero-shot, ~800 MB first download) or the "
-            "fast global XGBoost fallback committed in models/."
+            "XGBoost (default - fast, offline) or TimesFM 2.5 (Google, "
+            "zero-shot, ~800 MB checkpoint downloaded on first use)."
         ),
     )
     horizon = st.slider(

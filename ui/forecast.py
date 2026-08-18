@@ -259,7 +259,7 @@ def forecast_station(
         if timesfm_model is None:
             raise RuntimeError(
                 "TimesFM is not available (dependency or checkpoint download failed). "
-                "Switch the engine to XGBoost or install `requirements-ui.txt`."
+                "Switch the engine to XGBoost or install `requirements-timesfm.txt`."
             )
         series = prepare_series(df, station_code, band=band)
         result = _forecast_timesfm(series, horizon, timesfm_model.model)
