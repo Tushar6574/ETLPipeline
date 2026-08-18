@@ -296,12 +296,11 @@ and the steepest 24 h rise - not a hydrological model.
    quickly and the app runs on the XGBoost engine.
 4. The app URL is generated from the repo name, so creating the app activates
    **https://ETLPipeline.streamlit.app**.
-5. *(Optional)* to enable TimesFM 2.5 on the Cloud app, add a small
-   `requirements-cloud.txt` in the repo containing both files' contents
-   (`streamlit`, `plotly`, `folium`, `streamlit-folium`, `xgboost`,
-   `timesfm==2.0.2`, `torch`) and point Advanced settings at it. Note the torch
-   wheel (~200 MB) makes installs slower and can exceed the free-tier build
-   budget - it is only needed for the TimesFM engine.
+5. *(Optional)* to enable TimesFM 2.5 on the Cloud app, point Advanced settings
+   at **`requirements-cloud.txt`** instead (it includes `timesfm==2.0.2` +
+   `torch` on top of the UI stack) and keep Python 3.13. Note the torch wheel
+   (~200 MB) makes installs slower and can exceed the free-tier build budget -
+   it is only needed for the TimesFM engine.
 
 ---
 
@@ -436,12 +435,16 @@ Notable fixes along the way:
 │   └── viz.py              # Plotly charts + folium risk map
 ├── scripts/
 │   └── train_xgboost.py    # Trains + commits the XGBoost fallback models
+├── tests/                  # pytest suite (features, forecast, viz, transform)
 ├── models/                 # Committed XGBoost artifacts (xgb_q50.json, xgb_bands.json)
 ├── requirements.txt        # requests, pandas, numpy, pyarrow (ETL)
 ├── requirements-ui.txt     # streamlit, plotly, folium, xgboost (UI, light)
 ├── requirements-timesfm.txt# timesfm 2.5 + torch (optional TimesFM engine)
+├── requirements-cloud.txt  # full stack for Streamlit Cloud (UI + TimesFM)
+├── requirements-dev.txt    # pytest
 ├── .github/workflows/
-│   └── etl_schedule.yml    # Hourly cron + manual dispatch + auto-commit
+│   ├── etl_schedule.yml    # Hourly cron + manual dispatch + auto-commit
+│   └── model_retrain.yml   # Weekly XGBoost fallback retrain + auto-commit
 ├── output/                 # Published live dataset (CSV / Parquet / partitions / metadata)
 ├── mock_output/            # Mock-mode artefacts (kept strictly separate)
 └── etl_pipeline.py         # Legacy monolith (superseded; kept for reference)

@@ -1,0 +1,52 @@
+name: XGBoost Model Retrain (weekly)
+
+on:
+  schedule:
+    # Weekly: Monday 01:30 UTC. Retrains the committed XGBoost fallback on the
+    # freshest dataset so the dashboard's fallback engine stays in sync.
+    - cron: "30 1 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: model-retrain
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt xgboost
+
+      - name: Train XGBoost fallback model
+        run: python scripts/train_xgboost.py
+
+      - name: Commit and push updated models
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add models/
+          if git diff --cached --quiet; then
+            echo "No model changes; skipping commit."
+            exit 0
+          fi
+          git pull --rebase origin main
+          git commit -m "chore(models): weekly XGBoost fallback retrain [skip ci]"
+          git push origin "$(git rev-parse --abbrev-ref HEAD)"
+        shell: bash

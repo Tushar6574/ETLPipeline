@@ -275,11 +275,16 @@ def derive_flood_status(df: pd.DataFrame) -> pd.Series:
         (wl >= danger) & (wl < hfl),
         wl >= hfl,
     ]
-    return pd.Series(
+    out = pd.Series(
         np.select(conditions, FLOOD_STATUS_CHOICES, default=np.nan),
         index=df.index,
         name=FLOOD_STATUS_COL,
+        dtype="object",
     )
+    # np.select may coerce the float NaN default into the literal string "nan"
+    # when the choices are strings; normalise those back to real missing values.
+    out[out.eq("nan")] = np.nan
+    return out
 
 
 def create_dedup_key(df: pd.DataFrame) -> pd.Series:

@@ -63,31 +63,31 @@ def level_band(warning: float, danger: float, hfl: float):
     return (0.5 * min(vals), 1.6 * max(vals))
 
 
-def _junk_regime_mask(s: pd.Series, band, window: int = 168, min_hours: int = 48) -> pd.Series:
-    """Mask sustained junk regimes: weeks pinned above the band midpoint.
+def _junk_regime_mask(
+    s: pd.Series, band, window: int = 24, min_hours: int = 48, buffer: int = 36
+) -> pd.Series:
+    """Mask sustained junk regimes plus a safety buffer before each run.
 
-    NWDP telemetry carries both flat multi-day locks (e.g. Mandla ~1205 m
-    against a ~437 m danger level) and chaotic junk tails of wild spikes. A
-    real flood crest stays inside the band (below its midpoint), so a rolling
-    one-week mean above the midpoint flags an unphysical regime regardless of
-    whether it is flat or noisy. Flat high runs are also flagged directly.
+    NWDP telemetry carries both flat multi-day locks and chaotic junk tails of
+    wild spikes (e.g. Mandla ~1205 m against a ~437 m danger level). A rolling
+    mean over a short window bridges noisy dips inside a regime, so any run
+    lasting >= ``min_hours`` above the band midpoint is junk. The run is
+    extended backwards by ``buffer`` hours so the transition warm-up (when the
+    rolling mean has not caught up yet) is removed too, and individual values
+    pinned exactly at the clip cap are always dropped.
     """
     if band is None or len(s) < 100:
         return pd.Series(False, index=s.index)
     lo, hi = band
     midpoint = lo + 0.5 * (hi - lo)
-    sustained = s.rolling(window, min_periods=24).mean() > midpoint
-
-    std24 = s.rolling(24, min_periods=12).std().ffill()
+    smooth = s.rolling(window, min_periods=12).mean()
+    cand = smooth > midpoint
+    groups = (cand != cand.shift()).cumsum()
+    run_len = cand.groupby(groups).transform("size")
+    runs = cand & (run_len >= min_hours)
+    extended = runs.rolling(buffer, min_periods=1).max().shift(-buffer).fillna(False)
     pinned = s >= hi - 1e-6
-    flat_high = ((std24 < 0.2) | pinned) & (s > midpoint)
-    if flat_high.any():
-        groups = (flat_high != flat_high.shift()).cumsum()
-        run_len = flat_high.groupby(groups).transform("size")
-        flat_runs = flat_high & (run_len >= min_hours)
-    else:
-        flat_runs = flat_high
-    return pd.Series((sustained | flat_runs | pinned).values, index=s.index)
+    return pd.Series((runs | extended | pinned).values, index=s.index)
 
 
 def prepare_series(
