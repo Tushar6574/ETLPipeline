@@ -451,7 +451,6 @@ Notable fixes along the way:
 ├── requirements.txt        # Full stack: ETL + UI + TimesFM 2.5 (auto-detected by Streamlit Cloud)
 ├── requirements-ui.txt     # Light UI stack, no TimesFM (included by requirements.txt)
 ├── requirements-timesfm.txt# timesfm 2.5 + torch (included by requirements.txt)
-├── requirements-cloud.txt  # Explicit full-stack alias (-r requirements.txt)
 ├── requirements-dev.txt    # pytest
 ├── .github/workflows/
 │   ├── etl_schedule.yml    # Hourly cron + manual dispatch + auto-commit
