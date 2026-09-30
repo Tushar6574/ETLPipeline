@@ -3,8 +3,8 @@
   "data_provider": "Central Water Commission (CWC) via National Water Data Portal (NWDP, nwdp.nwic.gov.in)",
   "description": "Hourly river water level readings for key CWC gauge stations across major Indian river basins, sourced from the CWC Telemetry and Manual datasets on NWDP and categorised into hydrological alert statuses (NORMAL / WARNING / DANGER / HIGH_FLOOD_EXCEEDED).",
   "temporalCoverage": {
-    "start_date": "2025-09-27T17:30:00Z",
-    "end_date": "2026-09-27T17:30:00Z"
+    "start_date": "2025-09-28T17:30:00Z",
+    "end_date": "2026-09-28T17:30:00Z"
   },
   "monitored_basins": [
     "Cauvery",
@@ -34,7 +34,7 @@
       "warning_level_m": 45.72,
       "danger_level_m": 48.77,
       "high_flood_level_m": 55.66,
-      "records": 446
+      "records": 448
     },
     {
       "station_code": "KRSNWDP",
@@ -45,7 +45,7 @@
       "warning_level_m": 23.0,
       "danger_level_m": 23.5,
       "high_flood_level_m": 24.0,
-      "records": 2181
+      "records": 2185
     },
     {
       "station_code": "NRMMDL",
@@ -92,10 +92,10 @@
       "records": 0
     }
   ],
-  "total_records": 12497,
+  "total_records": 12503,
   "alert_status_distribution": {
-    "NORMAL": 6734,
-    "WARNING": 3233,
+    "NORMAL": 6764,
+    "WARNING": 3209,
     "DANGER": 1634,
     "HIGH_FLOOD_EXCEEDED": 791
   },
@@ -188,5 +188,5 @@
     }
   ],
   "retention_days": 365,
-  "generated_at": "2026-09-30T00:29:27Z"
+  "generated_at": "2026-09-30T06:45:14Z"
 }
